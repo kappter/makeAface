@@ -48,10 +48,19 @@
     body {
       margin: 0;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
       background-color: #f0f0f0;
+    }
+    .header {
+      font-size: 36px;
+      font-weight: bold;
+      font-family: Arial, sans-serif;
+      color: #333;
+      margin-bottom: 20px;
+      text-align: center;
     }
     .grid-container {
       display: grid;
@@ -66,6 +75,7 @@
   </style>
 </head>
 <body>
+  <div class="header">Click how you are feeling...</div>
   <div class="grid-container" id="grid"></div>
   <script>
     // Array to hold p5 instances
@@ -124,7 +134,22 @@
         }
 
         function drawHead() {
-          p.fill(255, p.random(200, 230), p.random(22, 200));
+          // Define skin tone ranges
+          let skinTones = [
+            // Light: warm/neutral undertones
+            { r: p.random(240, 255), g: p.random(200, 230), b: p.random(180, 210) },
+            // Medium: balanced undertones
+            { r: p.random(200, 230), g: p.random(150, 180), b: p.random(120, 150) },
+            // Dark: rich undertones
+            { r: p.random(140, 180), g: p.random(90, 120), b: p.random(70, 100) }
+          ];
+          // Randomly select a skin tone
+          let tone = p.random(skinTones);
+          // Add subtle variation
+          let r = p.constrain(tone.r + p.random(-15, 15), 0, 255);
+          let g = p.constrain(tone.g + p.random(-15, 15), 0, 255);
+          let b = p.constrain(tone.b + p.random(-15, 15), 0, 255);
+          p.fill(r, g, b);
           if (p.random(10) > 5) {
             p.bezier(
               p.random(p.width * 0.25, p.width * 0.35), p.random(p.height * 0.35, p.height * 0.55),
