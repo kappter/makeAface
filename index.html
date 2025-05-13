@@ -42,7 +42,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3x3 Random Face Grid</title>
+  <title>3x3 Random Face Grid with Random Refreshes</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
   <style>
     body {
@@ -78,17 +78,38 @@
       // Create a p5 instance for each canvas
       let sketch = function(p) {
         let eye1xpos, eye1ypos, eye2xpos, eye2ypos;
+        let lastRefreshTime = 0;
+        let nextRefreshDelay;
 
         p.setup = function() {
           let canvas = p.createCanvas(200, 200);
           canvas.parent(div);
-          p.frameRate(0.5); // Refresh every 2 seconds
           p.smooth();
+          // Set initial random delay (1 to 5 seconds)
+          nextRefreshDelay = p.random(1000, 5000);
+          // Draw immediately
+          drawFace();
         };
 
         p.draw = function() {
-          p.clear(); // Transparent background
+          // Check if enough time has passed for a refresh
+          if (p.millis() - lastRefreshTime >= nextRefreshDelay) {
+            drawFace();
+            // Set new random delay for next refresh
+            nextRefreshDelay = p.random(1000, 5000);
+            lastRefreshTime = p.millis();
+          }
+        };
 
+        p.mouseClicked = function() {
+          // Only save if click is within this canvas
+          if (p.mouseX >= 0 && p.mouseX < p.width && p.mouseY >= 0 && p.mouseY < p.height) {
+            p.saveCanvas('face-' + i, 'png');
+          }
+        };
+
+        function drawFace() {
+          p.clear(); // Transparent background
           if (p.random(10) > 4) {
             drawHair();
           }
@@ -100,14 +121,7 @@
           }
           drawNose();
           drawEyes();
-        };
-
-        p.mouseClicked = function() {
-          // Only save if click is within this canvas
-          if (p.mouseX >= 0 && p.mouseX < p.width && p.mouseY >= 0 && p.mouseY < p.height) {
-            p.saveCanvas('face-' + i, 'png');
-          }
-        };
+        }
 
         function drawHead() {
           p.fill(255, p.random(200, 230), p.random(22, 200));
