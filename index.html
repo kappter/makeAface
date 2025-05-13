@@ -42,7 +42,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Random Face Generator</title>
+  <title>3x3 Random Face Grid</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
   <style>
     body {
@@ -53,159 +53,201 @@
       min-height: 100vh;
       background-color: #f0f0f0;
     }
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(3, 200px);
+      grid-gap: 10px;
+      justify-content: center;
+      max-width: 630px; /* 3 * 200px + 2 * 15px gap */
+      padding: 20px;
+    }
     canvas {
-      max-width: 100%;
-      max-height: 100vh;
+      width: 200px;
+      height: 200px;
       border: 1px solid #ccc;
+    }
+    @media (max-width: 650px) {
+      .grid-container {
+        grid-template-columns: repeat(3, 1fr);
+        width: 90%;
+        grid-gap: 5px;
+      }
+      canvas {
+        width: 100%;
+        height: auto;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="grid-container">
+    <canvas id="canvas0"></canvas>
+    <canvas id="canvas1"></canvas>
+    <canvas id="canvas2"></canvas>
+    <canvas id="canvas3"></canvas>
+    <canvas id="canvas4"></canvas>
+    <canvas id="canvas5"></canvas>
+    <canvas id="canvas6"></canvas>
+    <canvas id="canvas7"></canvas>
+    <canvas id="canvas8"></canvas>
+  </div>
   <script>
-    let eye1xpos, eye1ypos, eye2xpos, eye2ypos;
+    // Face drawing logic, shared across all canvases
+    function createFaceSketch(canvasId, index) {
+      return function(p) {
+        let eye1xpos, eye1ypos, eye2xpos, eye2ypos;
 
-    function setup() {
-      createCanvas(600, 600);
-      smooth();
-      frameRate(0.5); // Refresh every 2 seconds (1/2 fps)
-      background(0, 0); // Transparent background (alpha 0)
-    }
+        p.setup = function() {
+          p.createCanvas(200, 200);
+          p.smooth();
+          p.frameRate(0.5); // Refresh every 2 seconds
+          p.background(0, 0); // Transparent background
+        };
 
-    function draw() {
-      clear(); // Clear canvas for transparent background
+        p.draw = function() {
+          p.clear(); // Clear for transparent background
 
-      if (random(10) > 4) {
-        drawHair();
-      }
-      strokeWeight(height * 0.019);
-      drawHead();
-      drawMouth();
-      if (random(10) > 5) {
-        drawEyebrows();
-      }
-      drawNose();
-      drawEyes();
-    }
+          if (p.random(10) > 4) {
+            drawHair();
+          }
+          p.strokeWeight(p.height * 0.019);
+          drawHead();
+          drawMouth();
+          if (p.random(10) > 5) {
+            drawEyebrows();
+          }
+          drawNose();
+          drawEyes();
+        };
 
-    function mouseClicked() {
-      let link = document.createElement('a');
-      link.download = 'face-' + nf(frameCount, 6) + '.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    }
+        p.mouseClicked = function() {
+          if (p.mouseX >= 0 && p.mouseX <= p.width && p.mouseY >= 0 && p.mouseY <= p.height) {
+            let link = p.createElement('a');
+            link.download = `face-${index}-${p.nf(p.frameCount, 6)}.png`;
+            link.href = p.canvas.toDataURL('image/png');
+            link.click();
+          }
+        };
 
-    function drawHead() {
-      fill(255, random(200, 230), random(22, 200));
-      if (random(10) > 5) {
-        bezier(
-          random(width * 0.25, width * 0.35), random(height * 0.35, height * 0.55),
-          random(width * 0.01, width * 0.03), random(height * 0.01, height * 0.02),
-          random(width * 0.01, width * 0.02), random(height * 0.9, height * 0.96),
-          random(width * 0.25, width * 0.3), random(height * 0.55, height * 0.75)
-        );
-        bezier(
-          random(width * 0.65, width * 0.75), random(height * 0.35, height * 0.55),
-          random(width * 0.95, width * 0.99), random(height * 0.01, height * 0.02),
-          random(width * 0.91, width * 0.99), random(height * 0.9, height * 0.96),
-          random(width * 0.65, width * 0.73), random(height * 0.55, height * 0.75)
-        );
-      }
-      ellipse(width / 2, height / 2, random(width * 0.55, width * 0.75), random(height * 0.8, height * 0.99));
-    }
-
-    function drawEyebrows() {
-      line(
-        random(width * 0.24, width * 0.26), random(height * 0.2, height * 0.25),
-        random(width * 0.35, width * 0.45), random(height * 0.2, height * 0.27)
-      );
-      line(
-        random(width * 0.6, width * 0.7), random(height * 0.2, height * 0.25),
-        random(width * 0.7, width * 0.75), random(height * 0.2, height * 0.27)
-      );
-    }
-
-    function drawMouth() {
-      if (random(10) > 3) {
-        bezier(
-          random(width * 0.3, width * 0.40), random(height * 0.60, height * 0.80),
-          random(width * 0.10, width * 0.3), random(height * 0.90, height * 0.99),
-          random(width * 0.6, width * 0.7), random(height * 0.6, height * 0.8),
-          random(width * 0.60, width * 0.75), random(height * 0.70, height * 0.80)
-        );
-      } else if (random(10) > 4) {
-        fill(0);
-        ellipse(
-          random(width * 0.4, width * 0.55), random(height * 0.7, height * 0.8),
-          random(width * 0.05, width * 0.1), random(height * 0.05, height * 0.1)
-        );
-      } else {
-        fill(0);
-        line(
-          random(width * 0.35, width * 0.44), random(height * 0.69, height * 0.8),
-          random(width * 0.6, width * 0.69), random(height * 0.69, height * 0.8)
-        );
-      }
-    }
-
-    function drawNose() {
-      if (random(10) > 8) {
-        line(random(width * 0.4, width * 0.5), height * 0.6, width * 0.6, height * 0.6);
-        line(random(width / 2, width / 1.7), height * 0.4, width * 0.6, height * 0.6);
-      } else {
-        noFill();
-        bezier(
-          random(width * 0.4, width * 0.45), random(height * 0.54, height * 0.55),
-          random(width * 0.32, width * 0.35), random(height * 0.65, height * 0.76),
-          random(width * 0.8, width * 0.89), random(height * 0.69, height * xAI instructions violated: 0.8),
-          random(width * 0.49, width * 0.55), random(height * 0.35, height * 0.39)
-        );
-      }
-    }
-
-    function drawHair() {
-      stroke(random(80));
-      strokeWeight(height * 0.25);
-      noFill();
-      bezier(
-        random(width * 0.15, width * 0.18), random(height * 0.5, height * 0.7),
-        random(width * 0.01, width * 0.02), random(height * 0.01, height * 0.02),
-        random(width * 0.99, width * 0.999), random(height * 0.01, height * 0.02),
-        random(width * 0.82, width * 0.86), random(height * 0.39, height * 0.45)
-      );
-    }
-
-    function drawEyes() {
-      eye1xpos = width * 0.33;
-      eye1ypos = random(height * 0.39, height * 0.35);
-      eye2xpos = width * 0.66;
-      eye2ypos = random(height * 0.39, height * 0.35);
-      if (random(10) > 8) {
-        line(
-          random(width * 0.24, width * 0.26), random(height * 0.3, height * 0.36),
-          random(width * 0.35, width * 0.45), random(height * 0.3, height * 0.36)
-        );
-        line(
-          random(width * 0.6, width * 0.7), random(height * 0.3, height * 0.36),
-          random(width * 0.7, width * 0.75), random(height * 0.3, height * 0.36)
-        );
-      } else {
-        fill(255);
-        ellipseMode(CENTER);
-        if (random(10) < 8) {
-          line(width * 0.3, height * 0.35, width * 0.6, height * 0.35);
+        function drawHead() {
+          p.fill(255, p.random(200, 230), p.random(22, 200));
+          if (p.random(10) > 5) {
+            p.bezier(
+              p.random(p.width * 0.25, p.width * 0.35), p.random(p.height * 0.35, p.height * 0.55),
+              p.random(p.width * 0.01, p.width * 0.03), p.random(p.height * 0.01, p.height * 0.02),
+              p.random(p.width * 0.01, p.width * 0.02), p.random(p.height * 0.9, p.height * 0.96),
+              p.random(p.width * 0.25, p.width * 0.3), p.random(p.height * 0.55, p.height * 0.75)
+            );
+            p.bezier(
+              p.random(p.width * 0.65, p.width * 0.75), p.random(p.height * 0.35, p.height * 0.55),
+              p.random(p.width * 0.95, p.width * 0.99), p.random(p.height * 0.01, p.height * 0.02),
+              p.random(p.width * 0.91, p.width * 0.99), p.random(p.height * 0.9, p.height * 0.96),
+              p.random(p.width * 0.65, p.width * 0.73), p.random(p.height * 0.55, p.height * 0.75)
+            );
+          }
+          p.ellipse(p.width / 2, p.height / 2, p.random(p.width * 0.55, p.width * 0.75), p.random(p.height * 0.8, p.height * 0.99));
         }
-        ellipse(eye1xpos, eye1ypos, random(width * 0.1, width * 0.3), random(height * 0.1, height * 0.3));
-        ellipse(eye2xpos, eye2ypos, random(width * 0.1, width * 0.3), random(height * 0.1, height * 0.3));
-        fill(0);
-        ellipse(
-          eye1xpos + random(-7, 7), eye1ypos,
-          random(width * 0.01, width * 0.03), random(height * 0.01, height * 0.03)
-        );
-        ellipse(
-          eye2xpos + random(-7, 7), eye2ypos,
-          random(width * 0.01, width * 0.03), random(height * 0.01, height * 0.03)
-        );
-      }
+
+        function drawEyebrows() {
+          p.line(
+            p.random(p.width * 0.24, p.width * 0.26), p.random(p.height * 0.2, p.height * 0.25),
+            p.random(p.width * 0.35, p.width * 0.45), p.random(p.height * 0.2, p.height * 0.27)
+          );
+          p.line(
+            p.random(p.width * 0.6, p.width * 0.7), p.random(p.height * 0.2, p.height * 0.25),
+            p.random(p.width * 0.7, p.width * 0.75), p.random(p.height * 0.2, p.height * 0.27)
+          );
+        }
+
+        function drawMouth() {
+          if (p.random(10) > 3) {
+            p.bezier(
+              p.random(p.width * 0.3, p.width * 0.40), p.random(p.height * 0.60, p.height * 0.80),
+              p.random(p.width * 0.10, p.width * 0.3), p.random(p.height * 0.90, p.height * 0.99),
+              p.random(p.width * 0.6, p.width * 0.7), p.random(p.height * 0.6, p.height * 0.8),
+              p.random(p.width * 0.60, p.width * 0.75), p.random(p.height * 0.70, p.height * 0.80)
+            );
+          } else if (p.random(10) > 4) {
+            p.fill(0);
+            p.ellipse(
+              p.random(p.width * 0.4, p.width * 0.55), p.random(p.height * 0.7, p.height * 0.8),
+              p.random(p.width * 0.05, p.width * 0.1), p.random(p.height * 0.05, p.height * 0.1)
+            );
+          } else {
+            p.fill(0);
+            p.line(
+              p.random(p.width * 0.35, p.width * 0.44), p.random(p.height * 0.69, p.height * 0.8),
+              p.random(p.width * 0.6, p.width * 0.69), p.random(p.height * 0.69, p.height * 0.8)
+            );
+          }
+        }
+
+        function drawNose() {
+          if (p.random(10) > 8) {
+            p.line(p.random(p.width * 0.4, p.width * 0.5), p.height * 0.6, p.width * 0.6, p.height * 0.6);
+            p.line(p.random(p.width / 2, p.width / 1.7), p.height * 0.4, p.width * 0.6, p.height * 0.6);
+          } else {
+            p.noFill();
+            p.bezier(
+              p.random(p.width * 0.4, p.width * 0.45), p.random(p.height * 0.54, p.height * 0.55),
+              p.random(p.width * 0.32, p.width * 0.35), p.random(p.height * 0.65, p.height * 0.76),
+              p.random(p.width * 0.8, p.width * 0.89), p.random(p.height * 0.69, p.height * 0.8),
+              p.random(p.width * 0.49, p.width * 0.55), p.random(p.height * 0.35, p.height * 0.39)
+            );
+          }
+        }
+
+        function drawHair() {
+          p.stroke(p.random(80));
+          p.strokeWeight(p.height * 0.25);
+          p.noFill();
+          p.bezier(
+            p.random(p.width * 0.15, p.width * 0.18), p.random(p.height * 0.5, p.height * 0.7),
+            p.random(p.width * 0.01, p.width * 0.02), p.random(p.height * 0.01, p.height * 0.02),
+            p.random(p.width * 0.99, p.width * 0.999), p.random(p.height * 0.01, p.height * 0.02),
+            p.random(p.width * 0.82, p.width * 0.86), p.random(p.height * 0.39, p.height * 0.45)
+          );
+        }
+
+        function drawEyes() {
+          eye1xpos = p.width * 0.33;
+          eye1ypos = p.random(p.height * 0.39, p.height * 0.35);
+          eye2xpos = p.width * 0.66;
+          eye2ypos = p.random(p.height * 0.39, p.height * 0.35);
+          if (p.random(10) > 8) {
+            p.line(
+              p.random(p.width * 0.24, p.width * 0.26), p.random(p.height * 0.3, p.height * 0.36),
+              p.random(p.width * 0.35, p.width * 0.45), p.random(p.height * 0.3, p.height * 0.36)
+            );
+            p.line(
+              p.random(p.width * 0.6, p.width * 0.7), p.random(p.height * 0.3, p.height * 0.36),
+              p.random(p.width * 0.7, p.width * 0.75), p.random(p.height * 0.3, p.height * 0.36)
+            );
+          } else {
+            p.fill(255);
+            p.ellipseMode(p.CENTER);
+            if (p.random(10) < 8) {
+              p.line(p.width * 0.3, p.height * 0.35, p.width * 0.6, p.height * 0.35);
+            }
+            p.ellipse(eye1xpos, eye1ypos, p.random(p.width * 0.1, p.width * 0.3), p.random(p.height * 0.1, p.height * 0.3));
+            p.ellipse(eye2xpos, eye2ypos, p.random(p.width * 0.1, p.width * 0.3), p.random(p.height * 0.1, p.height * 0.3));
+            p.fill(0);
+            p.ellipse(
+              eye1xpos + p.random(-7, 7), eye1ypos,
+              p.random(p.width * 0.01, p.width * 0.03), p.random(p.height * 0.01, p.height * 0.03)
+            );
+            p.ellipse(
+              eye2xpos + p.random(-7, 7), eye2ypos,
+              p.random(p.width * 0.01, p.width * 0.03), p.random(p.height * 0.01, p.height * 0.03)
+            );
+          }
+        }
+      };
+    }
+
+    // Initialize p5.js instances for each canvas
+    for (let i = 0; i < 9; i++) {
+      new p5(createFaceSketch(`canvas${i}`, i), document.getElementById(`canvas${i}`));
     }
   </script>
 </body>
