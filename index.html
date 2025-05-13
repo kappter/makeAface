@@ -50,62 +50,44 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
+      height: 100vh;
       background-color: #f0f0f0;
     }
     .grid-container {
       display: grid;
       grid-template-columns: repeat(3, 200px);
-      grid-gap: 10px;
-      justify-content: center;
-      max-width: 630px; /* 3 * 200px + 2 * 15px gap */
-      padding: 20px;
+      grid-template-rows: repeat(3, 200px);
+      gap: 10px;
     }
     canvas {
-      width: 200px;
-      height: 200px;
-      border: 1px solid #ccc;
-    }
-    @media (max-width: 650px) {
-      .grid-container {
-        grid-template-columns: repeat(3, 1fr);
-        width: 90%;
-        grid-gap: 5px;
-      }
-      canvas {
-        width: 100%;
-        height: auto;
-      }
+      display: block;
+      border: 1px solid #ccc; /* Optional: subtle border for visibility */
     }
   </style>
 </head>
 <body>
-  <div class="grid-container">
-    <canvas id="canvas0"></canvas>
-    <canvas id="canvas1"></canvas>
-    <canvas id="canvas2"></canvas>
-    <canvas id="canvas3"></canvas>
-    <canvas id="canvas4"></canvas>
-    <canvas id="canvas5"></canvas>
-    <canvas id="canvas6"></canvas>
-    <canvas id="canvas7"></canvas>
-    <canvas id="canvas8"></canvas>
-  </div>
+  <div class="grid-container" id="grid"></div>
   <script>
-    // Face drawing logic, shared across all canvases
-    function createFaceSketch(canvasId, index) {
-      return function(p) {
+    // Array to hold p5 instances
+    let sketches = [];
+
+    // Create 3x3 grid of canvases
+    for (let i = 0; i < 9; i++) {
+      let div = document.createElement('div');
+      document.getElementById('grid').appendChild(div);
+      // Create a p5 instance for each canvas
+      let sketch = function(p) {
         let eye1xpos, eye1ypos, eye2xpos, eye2ypos;
 
         p.setup = function() {
-          p.createCanvas(200, 200);
-          p.smooth();
+          let canvas = p.createCanvas(200, 200);
+          canvas.parent(div);
           p.frameRate(0.5); // Refresh every 2 seconds
-          p.background(0, 0); // Transparent background
+          p.smooth();
         };
 
         p.draw = function() {
-          p.clear(); // Clear for transparent background
+          p.clear(); // Transparent background
 
           if (p.random(10) > 4) {
             drawHair();
@@ -121,11 +103,9 @@
         };
 
         p.mouseClicked = function() {
-          if (p.mouseX >= 0 && p.mouseX <= p.width && p.mouseY >= 0 && p.mouseY <= p.height) {
-            let link = p.createElement('a');
-            link.download = `face-${index}-${p.nf(p.frameCount, 6)}.png`;
-            link.href = p.canvas.toDataURL('image/png');
-            link.click();
+          // Only save if click is within this canvas
+          if (p.mouseX >= 0 && p.mouseX < p.width && p.mouseY >= 0 && p.mouseY < p.height) {
+            p.saveCanvas('face-' + i, 'png');
           }
         };
 
@@ -184,8 +164,14 @@
 
         function drawNose() {
           if (p.random(10) > 8) {
-            p.line(p.random(p.width * 0.4, p.width * 0.5), p.height * 0.6, p.width * 0.6, p.height * 0.6);
-            p.line(p.random(p.width / 2, p.width / 1.7), p.height * 0.4, p.width * 0.6, p.height * 0.6);
+            p.line(
+              p.random(p.width * 0.4, p.width * 0.5), p.height * 0.6,
+              p.width * 0.6, p.height * 0.6
+            );
+            p.line(
+              p.random(p.width / 2, p.width / 1.7), p.height * 0.4,
+              p.width * 0.6, p.height * 0.6
+            );
           } else {
             p.noFill();
             p.bezier(
@@ -243,11 +229,7 @@
           }
         }
       };
-    }
-
-    // Initialize p5.js instances for each canvas
-    for (let i = 0; i < 9; i++) {
-      new p5(createFaceSketch(`canvas${i}`, i), document.getElementById(`canvas${i}`));
+      sketches.push(new p5(sketch));
     }
   </script>
 </body>
