@@ -42,15 +42,13 @@ const components = {
       }
     },
     'buzz-cut': () => {
-      ctx.fillStyle = state.hairColor;
+      ctx.save();
       ctx.beginPath();
-      ctx.arc(150mePath();
       ctx.arc(150, 150, 100, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalCompositeOperation = 'source-in';
+      ctx.clip();
       ctx.fillStyle = state.hairColor;
-      ctx.fillRect(50, 50, 200, 20);
-      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillRect(50, 50, 200, 30); // Thin hair layer
+      ctx.restore();
     },
     'bald': () => {}
   },
