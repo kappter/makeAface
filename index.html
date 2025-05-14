@@ -42,234 +42,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3x3 Random Face Grid with Random Refreshes</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
-  <style>
-    body {
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #f0f0f0;
-    }
-    .header {
-      font-size: 36px;
-      font-weight: bold;
-      font-family: Arial, sans-serif;
-      color: #333;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    .grid-container {
-      display: grid;
-      grid-template-columns: repeat(3, 200px);
-      grid-template-rows: repeat(3, 200px);
-      gap: 10px;
-    }
-    canvas {
-      display: block;
-      border: 1px solid #ccc; /* Optional: subtle border for visibility */
-    }
-  </style>
+  <title>MakeAFace - Counselor Assessment</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="header">Click how you are feeling...</div>
-  <div class="grid-container" id="grid"></div>
-  <script>
-    // Array to hold p5 instances
-    let sketches = [];
-
-    // Create 3x3 grid of canvases
-    for (let i = 0; i < 9; i++) {
-      let div = document.createElement('div');
-      document.getElementById('grid').appendChild(div);
-      // Create a p5 instance for each canvas
-      let sketch = function(p) {
-        let eye1xpos, eye1ypos, eye2xpos, eye2ypos;
-        let lastRefreshTime = 0;
-        let nextRefreshDelay;
-
-        p.setup = function() {
-          let canvas = p.createCanvas(200, 200);
-          canvas.parent(div);
-          p.smooth();
-          // Set initial random delay (1 to 5 seconds)
-          nextRefreshDelay = p.random(1000, 5000);
-          // Draw immediately
-          drawFace();
-        };
-
-        p.draw = function() {
-          // Check if enough time has passed for a refresh
-          if (p.millis() - lastRefreshTime >= nextRefreshDelay) {
-            drawFace();
-            // Set new random delay for next refresh
-            nextRefreshDelay = p.random(1000, 5000);
-            lastRefreshTime = p.millis();
-          }
-        };
-
-        p.mouseClicked = function() {
-          // Only save if click is within this canvas
-          if (p.mouseX >= 0 && p.mouseX < p.width && p.mouseY >= 0 && p.mouseY < p.height) {
-            p.saveCanvas('face-' + i, 'png');
-          }
-        };
-
-        function drawFace() {
-          p.clear(); // Transparent background
-          if (p.random(10) > 4) {
-            drawHair();
-          }
-          p.strokeWeight(p.height * 0.019);
-          drawHead();
-          drawMouth();
-          if (p.random(10) > 5) {
-            drawEyebrows();
-          }
-          drawNose();
-          drawEyes();
-        }
-
-        function drawHead() {
-          // Define skin tone ranges
-          let skinTones = [
-            // Light: warm/neutral undertones
-            { r: p.random(240, 255), g: p.random(200, 230), b: p.random(180, 210) },
-            // Medium: balanced undertones
-            { r: p.random(200, 230), g: p.random(150, 180), b: p.random(120, 150) },
-            // Dark: rich undertones
-            { r: p.random(140, 180), g: p.random(90, 120), b: p.random(70, 100) }
-          ];
-          // Randomly select a skin tone
-          let tone = p.random(skinTones);
-          // Add subtle variation
-          let r = p.constrain(tone.r + p.random(-15, 15), 0, 255);
-          let g = p.constrain(tone.g + p.random(-15, 15), 0, 255);
-          let b = p.constrain(tone.b + p.random(-15, 15), 0, 255);
-          p.fill(r, g, b);
-          if (p.random(10) > 5) {
-            p.bezier(
-              p.random(p.width * 0.25, p.width * 0.35), p.random(p.height * 0.35, p.height * 0.55),
-              p.random(p.width * 0.01, p.width * 0.03), p.random(p.height * 0.01, p.height * 0.02),
-              p.random(p.width * 0.01, p.width * 0.02), p.random(p.height * 0.9, p.height * 0.96),
-              p.random(p.width * 0.25, p.width * 0.3), p.random(p.height * 0.55, p.height * 0.75)
-            );
-            p.bezier(
-              p.random(p.width * 0.65, p.width * 0.75), p.random(p.height * 0.35, p.height * 0.55),
-              p.random(p.width * 0.95, p.width * 0.99), p.random(p.height * 0.01, p.height * 0.02),
-              p.random(p.width * 0.91, p.width * 0.99), p.random(p.height * 0.9, p.height * 0.96),
-              p.random(p.width * 0.65, p.width * 0.73), p.random(p.height * 0.55, p.height * 0.75)
-            );
-          }
-          p.ellipse(p.width / 2, p.height / 2, p.random(p.width * 0.55, p.width * 0.75), p.random(p.height * 0.8, p.height * 0.99));
-        }
-
-        function drawEyebrows() {
-          p.line(
-            p.random(p.width * 0.24, p.width * 0.26), p.random(p.height * 0.2, p.height * 0.25),
-            p.random(p.width * 0.35, p.width * 0.45), p.random(p.height * 0.2, p.height * 0.27)
-          );
-          p.line(
-            p.random(p.width * 0.6, p.width * 0.7), p.random(p.height * 0.2, p.height * 0.25),
-            p.random(p.width * 0.7, p.width * 0.75), p.random(p.height * 0.2, p.height * 0.27)
-          );
-        }
-
-        function drawMouth() {
-          if (p.random(10) > 3) {
-            p.bezier(
-              p.random(p.width * 0.3, p.width * 0.40), p.random(p.height * 0.60, p.height * 0.80),
-              p.random(p.width * 0.10, p.width * 0.3), p.random(p.height * 0.90, p.height * 0.99),
-              p.random(p.width * 0.6, p.width * 0.7), p.random(p.height * 0.6, p.height * 0.8),
-              p.random(p.width * 0.60, p.width * 0.75), p.random(p.height * 0.70, p.height * 0.80)
-            );
-          } else if (p.random(10) > 4) {
-            p.fill(0);
-            p.ellipse(
-              p.random(p.width * 0.4, p.width * 0.55), p.random(p.height * 0.7, p.height * 0.8),
-              p.random(p.width * 0.05, p.width * 0.1), p.random(p.height * 0.05, p.height * 0.1)
-            );
-          } else {
-            p.fill(0);
-            p.line(
-              p.random(p.width * 0.35, p.width * 0.44), p.random(p.height * 0.69, p.height * 0.8),
-              p.random(p.width * 0.6, p.width * 0.69), p.random(p.height * 0.69, p.height * 0.8)
-            );
-          }
-        }
-
-        function drawNose() {
-          if (p.random(10) > 8) {
-            p.line(
-              p.random(p.width * 0.4, p.width * 0.5), p.height * 0.6,
-              p.width * 0.6, p.height * 0.6
-            );
-            p.line(
-              p.random(p.width / 2, p.width / 1.7), p.height * 0.4,
-              p.width * 0.6, p.height * 0.6
-            );
-          } else {
-            p.noFill();
-            p.bezier(
-              p.random(p.width * 0.4, p.width * 0.45), p.random(p.height * 0.54, p.height * 0.55),
-              p.random(p.width * 0.32, p.width * 0.35), p.random(p.height * 0.65, p.height * 0.76),
-              p.random(p.width * 0.8, p.width * 0.89), p.random(p.height * 0.69, p.height * 0.8),
-              p.random(p.width * 0.49, p.width * 0.55), p.random(p.height * 0.35, p.height * 0.39)
-            );
-          }
-        }
-
-        function drawHair() {
-          p.stroke(p.random(80));
-          p.strokeWeight(p.height * 0.25);
-          p.noFill();
-          p.bezier(
-            p.random(p.width * 0.15, p.width * 0.18), p.random(p.height * 0.5, p.height * 0.7),
-            p.random(p.width * 0.01, p.width * 0.02), p.random(p.height * 0.01, p.height * 0.02),
-            p.random(p.width * 0.99, p.width * 0.999), p.random(p.height * 0.01, p.height * 0.02),
-            p.random(p.width * 0.82, p.width * 0.86), p.random(p.height * 0.39, p.height * 0.45)
-          );
-        }
-
-        function drawEyes() {
-          eye1xpos = p.width * 0.33;
-          eye1ypos = p.random(p.height * 0.39, p.height * 0.35);
-          eye2xpos = p.width * 0.66;
-          eye2ypos = p.random(p.height * 0.39, p.height * 0.35);
-          if (p.random(10) > 8) {
-            p.line(
-              p.random(p.width * 0.24, p.width * 0.26), p.random(p.height * 0.3, p.height * 0.36),
-              p.random(p.width * 0.35, p.width * 0.45), p.random(p.height * 0.3, p.height * 0.36)
-            );
-            p.line(
-              p.random(p.width * 0.6, p.width * 0.7), p.random(p.height * 0.3, p.height * 0.36),
-              p.random(p.width * 0.7, p.width * 0.75), p.random(p.height * 0.3, p.height * 0.36)
-            );
-          } else {
-            p.fill(255);
-            p.ellipseMode(p.CENTER);
-            if (p.random(10) < 8) {
-              p.line(p.width * 0.3, p.height * 0.35, p.width * 0.6, p.height * 0.35);
-            }
-            p.ellipse(eye1xpos, eye1ypos, p.random(p.width * 0.1, p.width * 0.3), p.random(p.height * 0.1, p.height * 0.3));
-            p.ellipse(eye2xpos, eye2ypos, p.random(p.width * 0.1, p.width * 0.3), p.random(p.height * 0.1, p.height * 0.3));
-            p.fill(0);
-            p.ellipse(
-              eye1xpos + p.random(-7, 7), eye1ypos,
-              p.random(p.width * 0.01, p.width * 0.03), p.random(p.height * 0.01, p.height * 0.03)
-            );
-            p.ellipse(
-              eye2xpos + p.random(-7, 7), eye2ypos,
-              p.random(p.width * 0.01, p.width * 0.03), p.random(p.height * 0.01, p.height * 0.03)
-            );
-          }
-        }
-      };
-      sketches.push(new p5(sketch));
-    }
-  </script>
+  <header>
+    <h1>MakeAFace Assessment</h1>
+    <p>Create a face to express how you feel</p>
+  </header>
+  <main>
+    <section id="face-display">
+      <canvas id="face-canvas" width="300" height="400" aria-label="Face rendering canvas"></canvas>
+    </section>
+    <section id="controls">
+      <div id="mood-selection">
+        <h2>How are you feeling?</h2>
+        <button data-mood="happy" aria-label="Select happy mood">Happy 😊</button>
+        <button data-mood="sad" aria-label="Select sad mood">Sad 😢</button>
+        <button data-mood="anxious" aria-label="Select anxious mood">Anxious 😟</button>
+        <button data-mood="lonely" aria-label="Select lonely mood">Lonely 😔</button>
+      </div>
+      <div id="hair-selection">
+        <h2>Hair Style</h2>
+        <select id="hair-style" aria-label="Select hair style">
+          <option value="short-crop">Short Crop</option>
+          <option value="long-waves">Long Waves</option>
+          <option value="braids">Braids</option>
+          <option value="bald">Bald</option>
+        </select>
+        <select id="hair-color" aria-label="Select hair color">
+          <option value="black">Black</option>
+          <option value="brown">Brown</option>
+          <option value="blonde">Blonde</option>
+        </select>
+      </div>
+      <div id="features-selection">
+        <h2>Facial Features</h2>
+        <select id="eyebrows" aria-label="Select eyebrow style">
+          <option value="thick">Thick</option>
+          <option value="arched">Arched</option>
+          <option value="straight">Straight</option>
+        </select>
+        <select id="facial-hair" aria-label="Select facial hair">
+          <option value="none">None</option>
+          <option value="beard">Beard</option>
+          <option value="mustache">Mustache</option>
+        </select>
+      </div>
+      <div id="notes-section">
+        <h2>Counselor Notes</h2>
+        <textarea id="counselor-notes" placeholder="Enter session notes..." aria-label="Counselor notes"></textarea>
+      </div>
+      <button id="save-assessment" aria-label="Save assessment">Save Assessment</button>
+    </section>
+  </main>
+  <script src="script.js"></script>
 </body>
 </html>
